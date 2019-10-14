@@ -35,6 +35,7 @@ enum StarlingError: Error {
     case audioLoadingFailure
 }
 
+@available(iOS 11.0, *)
 public class Starling {
     
     /// Defines the number of players which Starling instantiates
@@ -49,15 +50,23 @@ public class Starling {
     /// be ignored (not queued).
     private static let maximumTotalPlayers = 48
     
- // MARK: - Internal Properties
+    // MARK: - Internal Properties
     
     private var players: [StarlingAudioPlayer]
     private var files: [String: AVAudioFile]
     private let engine = AVAudioEngine()
+    
+    // MARK: - Public Properties
+    
+    public var volume: Float = 0.5
+    
+    // MARK: - Singleton
+    
+    static var shared = Starling()
 
     // MARK: - Initializer
     
-    public init() {
+    private init() {
         assert(Starling.defaultStartingPlayerCount <= Starling.maximumTotalPlayers, "Invalid starting and max audio player counts.")
         assert(Starling.defaultStartingPlayerCount > 0, "Starting audio player count must be > 0.")
         
@@ -235,6 +244,7 @@ private struct PlayerState {
     }
 }
 
+@available(iOS 11.0, *)
 private class StarlingAudioPlayer {
     let node = AVAudioPlayerNode()
     var state: PlayerState = PlayerState.idle()
@@ -245,6 +255,7 @@ private class StarlingAudioPlayer {
             self?.didCompletePlayback(for: identifier)
         }
         state = PlayerState(sound: identifier, status: .playing)
+        node.volume = Starling.shared.volume
         node.play()
     }
     
